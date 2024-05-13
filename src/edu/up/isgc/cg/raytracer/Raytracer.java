@@ -43,11 +43,11 @@ public class Raytracer {
         Model3D cube = OBJReader.getModel3D("Cube.obj", new Vector3D(0f, -2.5, 10.0), Color.WHITE);
         Model3D plane = OBJReader.getModel3D("Plane.obj", new Vector3D(0.0, -2.0, 0), Color.WHITE);
 
-//        teapot.setScale(0.7);
-//        teapot.setRotation(rotation);
+        teapot.setScale(0.7);
+        teapot.setRotation(rotation);
 //        teapot.setDiffuse(10);
         teapot.setReflectivity(0.75);
-        plane.setReflectivity(1);
+        plane.setReflectivity(0.5);
 
         scene02.addObject(teapot);
         scene02.addObject(cube);
@@ -173,38 +173,42 @@ public class Raytracer {
             Color objColor = closestIntersection.getObject().getColor();
 
             if (closestIntersection.getObject().getReflectivity() > 0) {
-                objColor = trace(ray, objects, null, new double[]{cameraZ + nearFarPlanes[0], cameraZ + nearFarPlanes[1]}, 1);
+                objColor = trace(ray, objects, closestIntersection.getObject(), new double[]{cameraZ + nearFarPlanes[0], cameraZ + nearFarPlanes[1]}, 1);
             }
 
             for (Light light : lights) {
-                double nDotL = light.getNDotL(closestIntersection);
-                Color lightColor = light.getColor();
-                double intensity = light.getIntensity() * nDotL;
-
-                Vector3D lightDir = Vector3D.normalize(Vector3D.substract(light.getPosition(), closestIntersection.getPosition()));
-                Vector3D viewDir = Vector3D.normalize(Vector3D.substract(mainCamera.getPosition(), closestIntersection.getPosition()));
-                Vector3D halfwayDir = Vector3D.normalize(Vector3D.add(lightDir, viewDir));
-
-                double spec = Math.pow(Math.max(Vector3D.dotProduct(halfwayDir, closestIntersection.getNormal()), 0), closestIntersection.getObject().getDiffuse());
-
-                double[] lightColors = new double[]{lightColor.getRed() / 255.0, lightColor.getGreen() / 255.0, lightColor.getBlue() / 255.0};
-                double[] objColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
-                for (int colorIndex = 0; colorIndex < objColors.length; colorIndex++) {
-                    objColors[colorIndex] *= intensity * lightColors[colorIndex];
-                }
-
-                Color diffuse = new Color((float) Math.clamp(objColors[0], 0.0, 1.0),
-                        (float) Math.clamp(objColors[1], 0.0, 1.0),
-                        (float) Math.clamp(objColors[2], 0.0, 1.0));
-
-                Color specular = new Color((float) Math.clamp(spec, 0.0, 1.0),
-                        (float) Math.clamp(spec, 0.0, 1.0),
-                        (float) Math.clamp(spec, 0.0, 1.0));
-
-                pixelColor = addColor(specular, diffuse);
+                pixelColor = blinnPhong(light, closestIntersection, mainCamera, objColor);
             }
         }
         image.setRGB(i, j, pixelColor.getRGB());
+    }
+
+    public static Color blinnPhong(Light light, Intersection closestIntersection, Camera mainCamera, Color objColor) {
+        double nDotL = light.getNDotL(closestIntersection);
+        Color lightColor = light.getColor();
+        double intensity = light.getIntensity() * nDotL;
+
+        Vector3D lightDir = Vector3D.normalize(Vector3D.substract(light.getPosition(), closestIntersection.getPosition()));
+        Vector3D viewDir = Vector3D.normalize(Vector3D.substract(mainCamera.getPosition(), closestIntersection.getPosition()));
+        Vector3D halfwayDir = Vector3D.normalize(Vector3D.add(lightDir, viewDir));
+
+        double spec = Math.pow(Math.max(Vector3D.dotProduct(halfwayDir, closestIntersection.getNormal()), 0), closestIntersection.getObject().getDiffuse());
+
+        double[] lightColors = new double[]{lightColor.getRed() / 255.0, lightColor.getGreen() / 255.0, lightColor.getBlue() / 255.0};
+        double[] objColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
+        for (int colorIndex = 0; colorIndex < objColors.length; colorIndex++) {
+            objColors[colorIndex] *= intensity * lightColors[colorIndex];
+        }
+
+        Color diffuse = new Color((float) Math.clamp(objColors[0], 0.0, 1.0),
+                (float) Math.clamp(objColors[1], 0.0, 1.0),
+                (float) Math.clamp(objColors[2], 0.0, 1.0));
+
+        Color specular = new Color((float) Math.clamp(spec, 0.0, 1.0),
+                (float) Math.clamp(spec, 0.0, 1.0),
+                (float) Math.clamp(spec, 0.0, 1.0));
+
+        return addColor(specular, diffuse);
     }
 
     public static Color addColor(Color original, Color otherColor) {
