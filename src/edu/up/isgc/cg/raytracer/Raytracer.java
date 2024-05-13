@@ -40,14 +40,15 @@ public class Raytracer {
 
         teapot.setScale(0.7);
         teapot.setRotation(rotation);
-
-        cube.setMaterial(Material.REFLECTIVE);
+        teapot.setDiffuse(10);
+        teapot.setReflectivity(0.8);
 
         scene02.addObject(teapot);
         scene02.addObject(cube);
         scene02.addObject(OBJReader.getModel3D("Ring.obj", new Vector3D(2.0, -1.0, 1.5), Color.BLUE));
 
         BufferedImage image = parallelImageRaytracing(scene02);
+//        BufferedImage image = imageRaytracing(scene02);
         File outputImage = new File("image.png");
         try {
             ImageIO.write(image, "png", outputImage);
@@ -158,11 +159,15 @@ public class Raytracer {
 
         Ray ray = new Ray(mainCamera.getPosition(), new Vector3D(x, y, z));
         Intersection closestIntersection = raycast(ray, objects, null,
-                new double[]{cameraZ + nearFarPlanes[0], cameraZ + nearFarPlanes[1]}, 1);
+                new double[]{cameraZ + nearFarPlanes[0], cameraZ + nearFarPlanes[1]});
 
         Color pixelColor = Color.BLACK;
         if (closestIntersection != null) {
             Color objColor = closestIntersection.getObject().getColor();
+
+            if (closestIntersection.getObject().getReflectivity() > 0) {
+                objColor = trace(ray, objects, null, new double[]{cameraZ + nearFarPlanes[0], cameraZ + nearFarPlanes[1]}, 1);
+            }
 
             for (Light light : lights) {
                 double nDotL = light.getNDotL(closestIntersection);
@@ -173,7 +178,7 @@ public class Raytracer {
                 Vector3D viewDir = Vector3D.normalize(Vector3D.substract(mainCamera.getPosition(), closestIntersection.getPosition()));
                 Vector3D halfwayDir = Vector3D.normalize(Vector3D.add(lightDir, viewDir));
 
-                double spec = Math.pow(Math.max(Vector3D.dotProduct(halfwayDir, closestIntersection.getNormal()), 0), 25);
+                double spec = Math.pow(Math.max(Vector3D.dotProduct(halfwayDir, closestIntersection.getNormal()), 0), closestIntersection.getObject().getDiffuse());
 
                 double[] lightColors = new double[]{lightColor.getRed() / 255.0, lightColor.getGreen() / 255.0, lightColor.getBlue() / 255.0};
                 double[] objColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
@@ -202,16 +207,12 @@ public class Raytracer {
         return new Color(red, green, blue);
     }
 
-    public static Intersection raycast(Ray ray, List<Object3D> objects, Object3D caster, double[] clippingPlanes, int depth) {
-        if (depth >= MAX_RAY_DEPTH) {
-            return null;
-        }
-
+    public static Intersection raycast(Ray ray, List<Object3D> objects, Object3D caster, double[] clippingPlanes) {
         Intersection closestIntersection = null;
 
         for (int i = 0; i < objects.size(); i++) {
             Object3D currObj = objects.get(i);
-            if (caster == null || !currObj.equals(caster)) {
+            if (!currObj.equals(caster)) {
                 Intersection intersection = currObj.getIntersection(ray);
                 if (intersection != null) {
                     double distance = intersection.getDistance();
@@ -220,15 +221,49 @@ public class Raytracer {
                     if (distance >= 0 &&
                             (closestIntersection == null || distance < closestIntersection.getDistance()) &&
                             (clippingPlanes == null || (intersectionZ >= clippingPlanes[0] && intersectionZ <= clippingPlanes[1]))) {
-                        switch (intersection.getObject().getMaterial()) {
-                            case DIFFUSE -> closestIntersection = intersection;
-                            case REFLECTIVE -> {
-                                Ray reflection_ray = new Ray(intersection.getPosition(), reflect(ray.getDirection(), intersection.getNormal()));
-                                Intersection new_intersection = raycast(reflection_ray, objects, caster, clippingPlanes, depth + 1);
+                        closestIntersection = intersection;
+                    }
+                }
+            }
+        }
 
-                                if (new_intersection != null) {
-                                    closestIntersection = new_intersection;
-                                }
+        return closestIntersection;
+    }
+
+    public static Color trace(Ray ray, List<Object3D> objects, Object3D caster, double[] clippingPlanes, double depth) {
+        if (depth >= MAX_RAY_DEPTH) {
+            return null;
+        }
+
+        Intersection closestIntersection = null;
+        Color color = Color.BLACK;
+
+        for (int i = 0; i < objects.size(); i++) {
+            Object3D currObj = objects.get(i);
+            if (!currObj.equals(caster)) {
+                Intersection intersection = currObj.getIntersection(ray);
+                if (intersection != null) {
+                    double distance = intersection.getDistance();
+                    double intersectionZ = intersection.getPosition().getZ();
+
+                    if (distance >= 0 &&
+                            (closestIntersection == null || distance < closestIntersection.getDistance()) &&
+                            (clippingPlanes == null || (intersectionZ >= clippingPlanes[0] && intersectionZ <= clippingPlanes[1]))) {
+
+                        closestIntersection = intersection;
+                        color = closestIntersection.getObject().getColor();
+
+                        if (intersection.getObject().getReflectivity() > 0) {
+                            Vector3D reflectedDirection = reflect(ray.getDirection(), intersection.getNormal());
+                            Ray reflectedRay = new Ray(intersection.getPosition(), reflectedDirection);
+                            Color hitColor = trace(reflectedRay, objects, caster, clippingPlanes, depth + 1);
+
+                            if (hitColor != null) {
+                                color = new Color(
+                                        (int)(closestIntersection.getObject().getReflectivity() * hitColor.getRed()),
+                                        (int)(closestIntersection.getObject().getReflectivity() * hitColor.getGreen()),
+                                        (int)(closestIntersection.getObject().getReflectivity() * hitColor.getBlue())
+                                );
                             }
                         }
                     }
@@ -236,7 +271,7 @@ public class Raytracer {
             }
         }
 
-        return closestIntersection;
+        return color;
     }
 
     public static Vector3D reflect(Vector3D I, Vector3D N) {

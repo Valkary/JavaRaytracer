@@ -1,7 +1,5 @@
 package edu.up.isgc.cg.raytracer.objects;
 
-import edu.up.isgc.cg.raytracer.Intersection;
-import edu.up.isgc.cg.raytracer.Ray;
 import edu.up.isgc.cg.raytracer.Vector3D;
 
 import java.awt.*;
@@ -9,18 +7,22 @@ import java.awt.*;
 public abstract class Object3D implements IIntersectable{
     private Color color;
     private Vector3D position;
-    public Material material;
+    private double diffuse;
+    private double reflectivity;
+
 
     public Object3D(Vector3D position, Color color) {
         setPosition(position);
         setColor(color);
-        setMaterial(Material.DIFFUSE);
+        diffuse = 100;
+        reflectivity = 0;
     }
 
-    public Object3D(Vector3D position, Color color, Material material) {
+    public Object3D(Vector3D position, Color color, double diffuse, double reflectivity) {
         setPosition(position);
         setColor(color);
-        setMaterial(material);
+        setDiffuse(diffuse);
+        setReflectivity(reflectivity);
     }
 
     public Color getColor() {
@@ -39,11 +41,19 @@ public abstract class Object3D implements IIntersectable{
         this.position = position;
     }
 
-    public Material getMaterial() {
-        return material;
+    public double getReflectivity() {
+        return reflectivity;
     }
 
-    public void setMaterial(Material material) {
-        this.material = material;
+    public void setReflectivity(double reflectivity) {
+        this.reflectivity = reflectivity;
+    }
+
+    public double getDiffuse() {
+        return diffuse;
+    }
+
+    public void setDiffuse(double diffuse) {
+        this.diffuse = diffuse;
     }
 }

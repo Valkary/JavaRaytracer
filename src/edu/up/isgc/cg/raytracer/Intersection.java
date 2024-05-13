@@ -3,7 +3,6 @@ package edu.up.isgc.cg.raytracer;
 import edu.up.isgc.cg.raytracer.objects.Object3D;
 
 public class Intersection {
-
     private double distance;
     private Vector3D position;
     private Vector3D normal;
