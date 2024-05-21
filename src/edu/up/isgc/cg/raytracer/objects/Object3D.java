@@ -7,22 +7,24 @@ import java.awt.*;
 public abstract class Object3D implements IIntersectable{
     private Color color;
     private Vector3D position;
-    private double diffuse;
-    private double reflectivity;
-
+    private double diffuseIndex;
+    private double reflectionIndex;
+    private double refractiveIndex;
 
     public Object3D(Vector3D position, Color color) {
         setPosition(position);
         setColor(color);
-        diffuse = 100;
-        reflectivity = 0;
+        diffuseIndex = 100;
+        reflectionIndex = 0;
+        refractiveIndex = 0;
     }
 
-    public Object3D(Vector3D position, Color color, double diffuse, double reflectivity) {
+    public Object3D(Vector3D position, Color color, double diffuse, double reflectivity, double refraction) {
         setPosition(position);
         setColor(color);
-        setDiffuse(diffuse);
-        setReflectivity(reflectivity);
+        setDiffuseIndex(diffuse);
+        setReflectionIndex(reflectivity);
+        setRefractiveIndex(refraction);
     }
 
     public Color getColor() {
@@ -41,19 +43,27 @@ public abstract class Object3D implements IIntersectable{
         this.position = position;
     }
 
-    public double getReflectivity() {
-        return reflectivity;
+    public double getReflectionIndex() {
+        return reflectionIndex;
     }
 
-    public void setReflectivity(double reflectivity) {
-        this.reflectivity = reflectivity;
+    public void setReflectionIndex(double reflectionIndex) {
+        this.reflectionIndex = reflectionIndex;
     }
 
-    public double getDiffuse() {
-        return diffuse;
+    public double getDiffuseIndex() {
+        return diffuseIndex;
     }
 
-    public void setDiffuse(double diffuse) {
-        this.diffuse = diffuse;
+    public void setDiffuseIndex(double diffuseIndex) {
+        this.diffuseIndex = diffuseIndex;
+    }
+
+    public double getRefractiveIndex() {
+        return refractiveIndex;
+    }
+
+    public void setRefractiveIndex(double refractiveIndex) {
+        this.refractiveIndex = refractiveIndex;
     }
 }

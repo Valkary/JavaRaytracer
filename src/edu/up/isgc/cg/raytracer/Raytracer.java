@@ -18,42 +18,44 @@ import java.util.concurrent.TimeUnit;
 
 public class Raytracer {
     private static final int MAX_RAY_DEPTH = 3;
-    private static final double EPSILON = 0.01;
+    private static final double EPSILON = 1e-3;
 
     public static void main(String[] args) {
         long startTime = System.nanoTime();
-        Quaternion rotation = new Quaternion(0.7071f, 0, 0, 0.7071f);
-
         System.out.println(new Date());
+
+        Quaternion rotation = new Quaternion(0.7071f, 0, 0, 0.7071f);
 
         Scene scene02 = new Scene();
         scene02.setCamera(new Camera(new Vector3D(0, 0, -4), 60, 60, 800, 800, 0.6, 50.0));
         scene02.addLight(new PointLight(new Vector3D(0.0, 1.0, 0.0), Color.WHITE, 0.8));
-        scene02.addObject(new Sphere(new Vector3D(0.0, 1.0, 5.0), 0.5, Color.RED));
-        scene02.addObject(new Sphere(new Vector3D(0.5, 1.0, 4.5), 0.25, new Color(200, 255, 0, 1)));
-        scene02.addObject(new Sphere(new Vector3D(0.35, 1.0, 4.5), 0.3, Color.BLUE));
 
-        Sphere pinkSphere = new Sphere(new Vector3D(4.85, 1.0, 4.5), 0.3, Color.PINK);
-        pinkSphere.setReflectivity(0.5);
+//        Model3D cube = OBJReader.getModel3D("Cube.obj", new Vector3D(0.5, 0, 5.0), Color.GREEN);
+        Sphere spehere = new Sphere(new Vector3D(0, 0, 2), .5, Color.PINK);
+        Model3D teapot = OBJReader.getModel3D("SmallTeapot.obj", new Vector3D(0.5, 0, 5.0), Color.BLUE);
 
-        scene02.addObject(pinkSphere);
-        scene02.addObject(new Sphere(new Vector3D(2.85, 1.0, 304.5), 0.5, Color.BLUE));
-        scene02.addObject(OBJReader.getModel3D("CubeQuad.obj", new Vector3D(-3.0, -2.5, 3.0), Color.GREEN));
-
-        Model3D teapot = OBJReader.getModel3D("SmallTeapot.obj", new Vector3D(2.0, -1.0, 1.5), Color.BLUE);
-        Model3D cube = OBJReader.getModel3D("Cube.obj", new Vector3D(0f, -2.5, 10.0), Color.WHITE);
         Model3D plane = OBJReader.getModel3D("Plane.obj", new Vector3D(0.0, -2.0, 0), Color.WHITE);
+        Model3D plane1 = OBJReader.getModel3D("Plane.obj", new Vector3D(5.0, 0.0, 0), Color.WHITE);
+        Model3D plane2 = OBJReader.getModel3D("Plane.obj", new Vector3D(-5.0, 0.0, 0), Color.WHITE);
 
-//        teapot.setScale(0.7);
-//        teapot.setRotation(rotation);
-//        teapot.setDiffuse(10);
-        teapot.setReflectivity(0.75);
-        plane.setReflectivity(1);
+        plane.setReflectionIndex(.8);
+        plane1.setReflectionIndex(.8);
+        plane2.setReflectionIndex(.8);
+        teapot.setReflectionIndex(0.75);
+        teapot.setDiffuseIndex(10);
+//        teapot.setRefractiveIndex(1);
+        spehere.setRefractiveIndex(1.3);
+        spehere.setReflectionIndex(.7);
+        plane1.setRotation(rotation);
+        plane2.setRotation(rotation);
 
         scene02.addObject(teapot);
-        scene02.addObject(cube);
-        scene02.addObject(OBJReader.getModel3D("Ring.obj", new Vector3D(2.0, -1.0, 1.5), Color.BLUE));
+        scene02.addObject(spehere);
+//        scene02.addObject(cube);
+
         scene02.addObject(plane);
+        scene02.addObject(plane1);
+        scene02.addObject(plane2);
 
         BufferedImage image = parallelImageRaytracing(scene02);
         File outputImage = new File("image.png");
@@ -141,55 +143,61 @@ public class Raytracer {
 
                     Ray ray = new Ray(mainCamera.getPosition(), new Vector3D(x, y, z));
 
-                    Color pixelColor = raytracePixel(mainCamera, objects, lights, ray, planes, 0);
+                    Color pixelColor = calculateColor(mainCamera, objects, lights, ray, planes, 0);
                     image.setRGB(i, j, pixelColor.getRGB());
                 }
             }
         };
     }
 
-    private static Color raytracePixel(Object3D caster, List<Object3D> objects, List<Light> lights, Ray ray, double[] planes, int depth) {
-        Intersection closestIntersection = raycast(ray, objects, null, planes);
+    private static Color calculateColor(Object3D caster, List<Object3D> objects, List<Light> lights, Ray ray, double[] clippingPlanes, int depth) {
+        Intersection closestIntersection = raycast(ray, objects, caster, clippingPlanes);
 
         Color pixelColor = Color.BLACK;
         if (closestIntersection != null) {
             Color objColor = closestIntersection.getObject().getColor();
 
+            // Calculate lighting
             for (Light light : lights) {
                 double nDotL = light.getNDotL(closestIntersection);
                 Color lightColor = light.getColor();
                 double intensity = light.getIntensity() * nDotL;
 
-                Vector3D lightDir = Vector3D.normalize(Vector3D.substract(light.getPosition(), closestIntersection.getPosition()));
-                Vector3D viewDir = Vector3D.normalize(Vector3D.substract(caster.getPosition(), closestIntersection.getPosition()));
-                Vector3D halfwayDir = Vector3D.normalize(Vector3D.add(lightDir, viewDir));
-
-                double spec = Math.pow(Math.max(Vector3D.dotProduct(halfwayDir, closestIntersection.getNormal()), 0), closestIntersection.getObject().getDiffuse());
-
                 double[] lightColors = new double[]{lightColor.getRed() / 255.0, lightColor.getGreen() / 255.0, lightColor.getBlue() / 255.0};
-                double[] objColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
-                for (int colorIndex = 0; colorIndex < objColors.length; colorIndex++) {
-                    objColors[colorIndex] *= intensity * lightColors[colorIndex];
+                double[] diffuseColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
+                for (int colorIndex = 0; colorIndex < diffuseColors.length; colorIndex++) {
+                    diffuseColors[colorIndex] *= intensity * lightColors[colorIndex];
                 }
 
-                Color diffuse = new Color((float) Math.clamp(objColors[0], 0.0, 1.0),
-                        (float) Math.clamp(objColors[1], 0.0, 1.0),
-                        (float) Math.clamp(objColors[2], 0.0, 1.0));
+                Color diffuse = new Color((float) Math.clamp(diffuseColors[0], 0.0, 1.0),
+                        (float) Math.clamp(diffuseColors[1], 0.0, 1.0),
+                        (float) Math.clamp(diffuseColors[2], 0.0, 1.0));
 
-                Color specular = new Color((float) Math.clamp(spec, 0.0, 1.0),
-                        (float) Math.clamp(spec, 0.0, 1.0),
-                        (float) Math.clamp(spec, 0.0, 1.0));
-
-                pixelColor = addColor(specular, diffuse);
+                pixelColor = addColor(pixelColor, diffuse);
             }
 
-            if (closestIntersection.getObject().getReflectivity() > 0 && depth <= MAX_RAY_DEPTH) {
+            // Handle reflection
+            if (closestIntersection.getObject().getReflectionIndex() > 0 && depth < MAX_RAY_DEPTH) {
                 Vector3D reflectedVector = reflect(ray.getDirection(), closestIntersection.getNormal());
                 Vector3D offset = Vector3D.scalarMultiplication(closestIntersection.getNormal(), EPSILON);
                 Vector3D reflectedOrigin = Vector3D.add(closestIntersection.getPosition(), offset);
                 Ray reflectedRay = new Ray(reflectedOrigin, reflectedVector);
-                Color reflectedColor = raytracePixel(closestIntersection.getObject(), objects, lights, reflectedRay, planes, depth + 1);
-                pixelColor = blendColors(objColor, reflectedColor, closestIntersection.getObject().getReflectivity());
+                Color reflectedColor = calculateColor(closestIntersection.getObject(), objects, lights, reflectedRay, clippingPlanes, depth + 1);
+                pixelColor = blendColors(pixelColor, reflectedColor, closestIntersection.getObject().getReflectionIndex());
+            }
+
+            // Handle refraction
+            if (closestIntersection.getObject().getRefractiveIndex() > 0 && depth < MAX_RAY_DEPTH) {
+                double n1 = caster == null ? 1.0 : caster.getRefractiveIndex(); // Air refraction index
+                double n2 = closestIntersection.getObject().getRefractiveIndex();
+                Vector3D refractedDir = refract(ray.getDirection(), closestIntersection.getNormal(), n1, n2);
+                if (refractedDir != null) { // If not total internal reflection
+                    Vector3D offset = Vector3D.scalarMultiplication(closestIntersection.getNormal(), EPSILON);
+                    Vector3D refractedOrigin = Vector3D.add(closestIntersection.getPosition(), offset);
+                    Ray refractedRay = new Ray(refractedOrigin, refractedDir);
+                    Color refractedColor = calculateColor(closestIntersection.getObject(), objects, lights, refractedRay, clippingPlanes, depth + 1);
+                    pixelColor = blendColors(pixelColor, refractedColor, closestIntersection.getObject().getRefractiveIndex());
+                }
             }
         }
         return pixelColor;
@@ -225,14 +233,25 @@ public class Raytracer {
         return closestIntersection;
     }
 
-    public static Color blendColors(Color baseColor, Color reflectedColor, double reflectivity) {
-        int r = (int) (baseColor.getRed() * (1 - reflectivity) + reflectedColor.getRed() * reflectivity);
-        int g = (int) (baseColor.getGreen() * (1 - reflectivity) + reflectedColor.getGreen() * reflectivity);
-        int b = (int) (baseColor.getBlue() * (1 - reflectivity) + reflectedColor.getBlue() * reflectivity);
-        return new Color(Math.min(r, 255), Math.min(g, 255), Math.min(b, 255));
+    public static Color blendColors(Color baseColor, Color blendColor, double blendFactor) {
+        int r = (int) (baseColor.getRed() * (1 - blendFactor) + blendColor.getRed() * blendFactor);
+        int g = (int) (baseColor.getGreen() * (1 - blendFactor) + blendColor.getGreen() * blendFactor);
+        int b = (int) (baseColor.getBlue() * (1 - blendFactor) + blendColor.getBlue() * blendFactor);
+        return new Color(Math.clamp(r, 0, 255), Math.clamp(g, 0, 255), Math.clamp(b, 0, 255));
     }
 
     public static Vector3D reflect(Vector3D I, Vector3D N) {
         return Vector3D.substract(I, Vector3D.scalarMultiplication(N,Vector3D.dotProduct(I, N) * 2.0));
+    }
+
+    public static Vector3D refract(Vector3D incident, Vector3D normal, double n1, double n2) {
+        double ratio = n1 / n2;
+        double cosI = -Vector3D.dotProduct(normal, incident);
+        double sinT2 = ratio * ratio * (1.0 - cosI * cosI);
+        if (sinT2 > 1.0) {
+            return null; // Total internal reflection
+        }
+        double cosT = Math.sqrt(1.0 - sinT2);
+        return Vector3D.add(Vector3D.scalarMultiplication(incident, ratio), Vector3D.scalarMultiplication(normal, ratio * cosI - cosT));
     }
 }
