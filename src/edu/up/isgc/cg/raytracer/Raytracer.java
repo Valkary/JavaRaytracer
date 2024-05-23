@@ -28,34 +28,19 @@ public class Raytracer {
 
         Scene scene02 = new Scene();
         scene02.setCamera(new Camera(new Vector3D(0, 0, -4), 60, 60, 800, 800, 0.6, 50.0));
-        scene02.addLight(new PointLight(new Vector3D(0.0, 1.0, 0.0), Color.WHITE, 0.8));
+        scene02.addLight(new PointLight(new Vector3D(0.0, 1.0, 0.0), Color.WHITE, 1));
 
-//        Model3D cube = OBJReader.getModel3D("Cube.obj", new Vector3D(0.5, 0, 5.0), Color.GREEN);
-        Sphere spehere = new Sphere(new Vector3D(0, 0, 2), .5, Color.PINK);
-        Model3D teapot = OBJReader.getModel3D("SmallTeapot.obj", new Vector3D(0.5, 0, 5.0), Color.BLUE);
+        Sphere spehere = new Sphere(new Vector3D(0, 0, 0.5), .5, Color.PINK);
+        Model3D teapot = OBJReader.getModel3D("SmallTeapot.obj", new Vector3D(0.5, 0, 2), Color.BLUE);
 
-        Model3D plane = OBJReader.getModel3D("Plane.obj", new Vector3D(0.0, -2.0, 0), Color.WHITE);
-        Model3D plane1 = OBJReader.getModel3D("Plane.obj", new Vector3D(5.0, 0.0, 0), Color.WHITE);
-        Model3D plane2 = OBJReader.getModel3D("Plane.obj", new Vector3D(-5.0, 0.0, 0), Color.WHITE);
-
-        plane.setReflectionIndex(.8);
-        plane1.setReflectionIndex(.8);
-        plane2.setReflectionIndex(.8);
-        teapot.setReflectionIndex(0.75);
         teapot.setDiffuseIndex(10);
-//        teapot.setRefractiveIndex(1);
+        teapot.setScale(3);
+        teapot.setRotation(rotation);
         spehere.setRefractiveIndex(1.3);
         spehere.setReflectionIndex(.7);
-        plane1.setRotation(rotation);
-        plane2.setRotation(rotation);
 
         scene02.addObject(teapot);
         scene02.addObject(spehere);
-//        scene02.addObject(cube);
-
-        scene02.addObject(plane);
-        scene02.addObject(plane1);
-        scene02.addObject(plane2);
 
         BufferedImage image = parallelImageRaytracing(scene02);
         File outputImage = new File("image.png");
