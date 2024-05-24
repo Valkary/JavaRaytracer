@@ -12,7 +12,7 @@ public class Material {
     public static Material MATTE = new Material(0.0, 1.0, 15.0);
     public static Material GLASS = new Material(0.1, 1.5, 50.0);
     public static Material NONE = new Material(0.0, 0.0, 0.0);
-    public static Material METAL = new Material(0.95, 0.0, 200);
+    public static Material METAL = new Material(0.8, 0.0, 10);
 
     public Material(Color color, double reflectivity, double refractivity, double shininess) {
         this.color = color;
@@ -27,7 +27,7 @@ public class Material {
         this.shininess = shininess;
     }
 
-    public Material instantiateWithColor(Color color) {
+    public Material colored(Color color) {
         return new Material(color, reflectivity, refractivity, shininess);
     }
 
