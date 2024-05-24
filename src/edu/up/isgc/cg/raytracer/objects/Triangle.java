@@ -4,6 +4,8 @@ import edu.up.isgc.cg.raytracer.Intersection;
 import edu.up.isgc.cg.raytracer.Ray;
 import edu.up.isgc.cg.raytracer.Vector3D;
 
+import java.util.Arrays;
+
 public class Triangle implements IIntersectable {
     public static final double EPSILON = 0.0000000000001;
     private Vector3D[] vertices;
@@ -21,6 +23,13 @@ public class Triangle implements IIntersectable {
             setVertices(Vector3D.ZERO(),Vector3D.ZERO(),Vector3D.ZERO());
         }
         setNormals(normals);
+    }
+
+    public Triangle clone() {
+        return new Triangle(
+                vertices.clone(),
+                normals == null ? null : normals.clone()
+        );
     }
 
     public Vector3D[] getVertices() {
@@ -96,5 +105,13 @@ public class Triangle implements IIntersectable {
         }
 
         return intersection;
+    }
+
+    @Override
+    public String toString() {
+        return "Triangle{" +
+                "vertices=" + Arrays.toString(vertices) +
+                ", normals=" + Arrays.toString(normals) +
+                '}';
     }
 }

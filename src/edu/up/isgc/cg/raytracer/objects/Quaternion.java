@@ -7,6 +7,8 @@ public class Quaternion {
     public double y;
     public double z;
 
+    public static Quaternion IDENTITY = new Quaternion(1,0,0,0);
+
     public Quaternion(double w, double x, double y, double z) {
         this.w = w;
         this.x = x;
@@ -90,5 +92,16 @@ public class Quaternion {
                 a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
                 a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w
         );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Quaternion that = (Quaternion) obj;
+        return Double.compare(that.w, w) == 0 &&
+                Double.compare(that.x, x) == 0 &&
+                Double.compare(that.y, y) == 0 &&
+                Double.compare(that.z, z) == 0;
     }
 }

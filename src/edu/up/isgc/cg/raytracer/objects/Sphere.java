@@ -3,13 +3,14 @@ package edu.up.isgc.cg.raytracer.objects;
 import edu.up.isgc.cg.raytracer.Intersection;
 import edu.up.isgc.cg.raytracer.Ray;
 import edu.up.isgc.cg.raytracer.Vector3D;
+import edu.up.isgc.cg.raytracer.tools.Material;
 
 import java.awt.*;
 
 public class Sphere extends Object3D{
     private double radius;
-    public Sphere(Vector3D position, double radius, Color color) {
-        super(position, color);
+    public Sphere(Vector3D position, double radius, Material material) {
+        super(position, material);
         setRadius(radius);
     }
 

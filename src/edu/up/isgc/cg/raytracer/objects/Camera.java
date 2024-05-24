@@ -3,6 +3,7 @@ package edu.up.isgc.cg.raytracer.objects;
 import edu.up.isgc.cg.raytracer.Intersection;
 import edu.up.isgc.cg.raytracer.Ray;
 import edu.up.isgc.cg.raytracer.Vector3D;
+import edu.up.isgc.cg.raytracer.tools.Material;
 
 import java.awt.*;
 
@@ -15,7 +16,7 @@ public class Camera extends Object3D {
 
     public Camera(Vector3D position, double fovH, double fovV,
                   int width, int height, double nearPlane, double farPlane) {
-        super(position, Color.BLACK);
+        super(position, Material.NONE);
         setFOV(fovH, fovV);
         setResolution(width, height);
         setNearFarPlanes(new double[]{nearPlane, farPlane});
