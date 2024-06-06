@@ -6,12 +6,9 @@ package edu.up.isgc.cg.raytracer.tools;
 
 import edu.up.isgc.cg.raytracer.Vector3D;
 import edu.up.isgc.cg.raytracer.objects.Model3D;
-import edu.up.isgc.cg.raytracer.objects.Quaternion;
 import edu.up.isgc.cg.raytracer.objects.Triangle;
 
-import java.awt.*;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,9 +17,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Jafet
+ * The OBJReader class provides functionality to read and parse .obj files to create Model3D objects.
+ *
+ * @author Jafet Rodriguez
  */
 public abstract class OBJReader {
+
+    /**
+     * Reads a .obj file from the specified path and creates a Model3D object with the given origin and material.
+     *
+     * @param path The path to the .obj file.
+     * @param origin The origin position of the model.
+     * @param material The material of the model.
+     * @return A Model3D object representing the parsed .obj file.
+     */
     public static Model3D getModel3D(String path, Vector3D origin, Material material) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -76,8 +84,8 @@ public abstract class OBJReader {
 
                         Vector3D[] arrangedTriangleVertices = null;
                         Vector3D[] arrangedTriangleNormals = null;
-                        if(normals.size() > 0 && !faceNormals.isEmpty()) {
-                            for(int i = 0; i < faceNormals.size(); i++) {
+                        if (normals.size() > 0 && !faceNormals.isEmpty()) {
+                            for (int i = 0; i < faceNormals.size(); i++) {
                                 triangleNormals[i] = normals.get(faceNormals.get(i) - 1);
                             }
                             arrangedTriangleNormals = new Vector3D[]{triangleNormals[1], triangleNormals[0], triangleNormals[2]};
@@ -88,14 +96,14 @@ public abstract class OBJReader {
                         triangles.add(tmpTriangle);
 
                         List<Triangle> trianglesInMap = smoothingMap.get(smoothingGroup);
-                        if(trianglesInMap == null) {
+                        if (trianglesInMap == null) {
                             trianglesInMap = new ArrayList<>();
                         }
                         trianglesInMap.add(tmpTriangle);
 
                         if (faceVertex.size() == 4) {
                             arrangedTriangleVertices = new Vector3D[]{triangleVertices[2], triangleVertices[0], triangleVertices[3]};
-                            if(arrangedTriangleNormals != null){
+                            if (arrangedTriangleNormals != null) {
                                 arrangedTriangleNormals = new Vector3D[]{triangleNormals[2], triangleNormals[0], triangleNormals[3]};
                             }
                             tmpTriangle = new Triangle(arrangedTriangleVertices, arrangedTriangleNormals);
@@ -103,19 +111,19 @@ public abstract class OBJReader {
                             trianglesInMap.add(tmpTriangle);
                         }
 
-                        if(smoothingGroup != defaultSmoothingGroup) {
+                        if (smoothingGroup != defaultSmoothingGroup) {
                             smoothingMap.put(smoothingGroup, trianglesInMap);
                         }
                     }
-                } else if(line.startsWith("s ")) {
+                } else if (line.startsWith("s ")) {
                     String[] smoothingComponents = line.split("(\\s)+");
-                    if(smoothingComponents.length > 1) {
-                        if(smoothingComponents[1].equals("off")){
+                    if (smoothingComponents.length > 1) {
+                        if (smoothingComponents[1].equals("off")) {
                             smoothingGroup = defaultSmoothingGroup;
                         } else {
                             try {
                                 smoothingGroup = Integer.parseInt(smoothingComponents[1]);
-                            } catch (NumberFormatException nfe){
+                            } catch (NumberFormatException nfe) {
                                 smoothingGroup = defaultSmoothingGroup;
                             }
                         }
@@ -124,7 +132,7 @@ public abstract class OBJReader {
             }
             reader.close();
 
-            //Smooth vertices normals
+            // Smooth vertices normals
             for (Integer key : smoothingMap.keySet()) {
                 Map<Vector3D, NormalPair> vertexMap = new HashMap<>();
                 List<Triangle> trianglesInMap = smoothingMap.get(key);
@@ -162,10 +170,18 @@ public abstract class OBJReader {
     }
 }
 
-class NormalPair{
+/**
+ * Inner class for ease of use in the OBJReader
+ *
+ * @author Jafet Rodriguez
+ */
+class NormalPair {
     Vector3D normal;
     int count;
 
+    /**
+     * Creates a normal pair instance
+     */
     public NormalPair() {
         normal = Vector3D.ZERO();
         count = 0;

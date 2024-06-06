@@ -10,23 +10,46 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The Model3D class represents a 3D model composed of triangles.
+ * It includes functionality for scaling, rotating, and transforming the model.
+ *
+ * @author  Jafet Rodriguez, José Salcedo
+ */
 public class Model3D extends Object3D {
     private List<Triangle> triangles;
     private double scale = 1;
     private Quaternion rotation = null;
     public final List<Triangle> originalTriangles; // Store the original triangles
 
+    /**
+     * Constructs a new Model3D with the specified position, triangles, and material.
+     *
+     * @param position The position of the model.
+     * @param triangles The array of triangles composing the model.
+     * @param material The material of the model.
+     */
     public Model3D(Vector3D position, Triangle[] triangles, Material material) {
         super(position, material);
         originalTriangles = Arrays.asList(triangles);
         setTriangles(triangles);
     }
 
+    /**
+     * Sets the triangles of the model and applies transformations.
+     *
+     * @param triangles The array of triangles to set.
+     */
     private void setTriangles(Triangle[] triangles) {
         this.triangles = Arrays.asList(triangles.clone());
         updateTrianglesWithTransformation();
     }
 
+    /**
+     * Gets the list of triangles composing the model.
+     *
+     * @return The list of triangles.
+     */
     public List<Triangle> getTriangles() {
         return triangles;
     }
@@ -60,24 +83,47 @@ public class Model3D extends Object3D {
         return new Intersection(position, distance, normal, this);
     }
 
+    /**
+     * Gets the scale of the model.
+     *
+     * @return The scale of the model.
+     */
     public double getScale() {
         return scale;
     }
 
+    /**
+     * Sets the scale of the model and updates the transformations.
+     *
+     * @param scale The new scale of the model.
+     */
     public void setScale(double scale) {
         this.scale = scale;
         updateTrianglesWithTransformation();
     }
 
+    /**
+     * Gets the rotation of the model.
+     *
+     * @return The rotation of the model.
+     */
     public Quaternion getRotation() {
         return rotation;
     }
 
+    /**
+     * Sets the rotation of the model and updates the transformations.
+     *
+     * @param rotation The new rotation of the model.
+     */
     public void setRotation(Quaternion rotation) {
         this.rotation = rotation;
         updateTrianglesWithTransformation();
     }
 
+    /**
+     * Updates the triangles with the current transformations (scale and rotation).
+     */
     private void updateTrianglesWithTransformation() {
         Vector3D position = getPosition();
         for (int i = 0; i < originalTriangles.size(); i++) {

@@ -6,25 +6,49 @@ import edu.up.isgc.cg.raytracer.Vector3D;
 
 import java.util.Arrays;
 
+/**
+ * The Triangle class represents a triangle in a 3D scene.
+ * It includes methods for calculating intersections with rays.
+ *
+ * @author Jafet Rodriguez
+ */
 public class Triangle implements IIntersectable {
     public static final double EPSILON = 0.0000000000001;
     private Vector3D[] vertices;
     private Vector3D[] normals;
 
+    /**
+     * Constructs a new Triangle with the specified vertices.
+     *
+     * @param v0 The first vertex.
+     * @param v1 The second vertex.
+     * @param v2 The third vertex.
+     */
     public Triangle(Vector3D v0, Vector3D v1, Vector3D v2) {
         setVertices(v0, v1, v2);
         setNormals(null);
     }
 
+    /**
+     * Constructs a new Triangle with the specified vertices and normals.
+     *
+     * @param vertices The array of vertices.
+     * @param normals The array of normals.
+     */
     public Triangle(Vector3D[] vertices, Vector3D[] normals) {
-        if(vertices.length == 3){
+        if (vertices.length == 3) {
             setVertices(vertices[0], vertices[1], vertices[2]);
         } else {
-            setVertices(Vector3D.ZERO(),Vector3D.ZERO(),Vector3D.ZERO());
+            setVertices(Vector3D.ZERO(), Vector3D.ZERO(), Vector3D.ZERO());
         }
         setNormals(normals);
     }
 
+    /**
+     * Creates and returns a copy of this triangle.
+     *
+     * @return A clone of this triangle.
+     */
     public Triangle clone() {
         return new Triangle(
                 vertices.clone(),
@@ -32,6 +56,11 @@ public class Triangle implements IIntersectable {
         );
     }
 
+    /**
+     * Gets the vertices of the triangle.
+     *
+     * @return The array of vertices.
+     */
     public Vector3D[] getVertices() {
         return vertices;
     }
@@ -40,24 +69,36 @@ public class Triangle implements IIntersectable {
         this.vertices = vertices;
     }
 
+    /**
+     * Sets the vertices of the triangle.
+     *
+     * @param v0 The first vertex.
+     * @param v1 The second vertex.
+     * @param v2 The third vertex.
+     */
     public void setVertices(Vector3D v0, Vector3D v1, Vector3D v2) {
         setVertices(new Vector3D[]{v0, v1, v2});
     }
 
-    public Vector3D getNormal(){
+    /**
+     * Gets the normal vector of the triangle.
+     *
+     * @return The normal vector.
+     */
+    public Vector3D getNormal() {
         Vector3D normal = Vector3D.ZERO();
         Vector3D[] normals = this.normals;
 
-        if(normals ==null) {
+        if (normals == null) {
             Vector3D[] vertices = getVertices();
             Vector3D v = Vector3D.substract(vertices[1], vertices[0]);
             Vector3D w = Vector3D.substract(vertices[0], vertices[2]);
             normal = Vector3D.normalize(Vector3D.crossProduct(v, w));
-        } else{
-            for(int i = 0; i < normals.length; i++){
-                normal.setX(normal.getX() + normals[i].getX());
-                normal.setY(normal.getY() + normals[i].getY());
-                normal.setZ(normal.getZ() + normals[i].getZ());
+        } else {
+            for (Vector3D n : normals) {
+                normal.setX(normal.getX() + n.getX());
+                normal.setY(normal.getY() + n.getY());
+                normal.setZ(normal.getZ() + n.getZ());
             }
             normal.setX(normal.getX() / normals.length);
             normal.setY(normal.getY() / normals.length);
@@ -66,8 +107,13 @@ public class Triangle implements IIntersectable {
         return normal;
     }
 
+    /**
+     * Gets the normals of the triangle.
+     *
+     * @return The array of normals.
+     */
     public Vector3D[] getNormals() {
-        if(normals == null) {
+        if (normals == null) {
             Vector3D normal = getNormal();
             setNormals(new Vector3D[]{normal, normal, normal});
         }
@@ -78,6 +124,13 @@ public class Triangle implements IIntersectable {
         this.normals = normals;
     }
 
+    /**
+     * Sets the normals of the triangle.
+     *
+     * @param vn0 The first normal.
+     * @param vn1 The second normal.
+     * @param vn2 The third normal.
+     */
     public void setNormals(Vector3D vn0, Vector3D vn1, Vector3D vn2) {
         setNormals(new Vector3D[]{vn0, vn1, vn2});
     }
