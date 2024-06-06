@@ -13,7 +13,7 @@ import java.util.List;
 public class Model3D extends Object3D {
     private List<Triangle> triangles;
     private double scale = 1;
-    private Quaternion rotation= null;
+    private Quaternion rotation = null;
     public final List<Triangle> originalTriangles; // Store the original triangles
 
     public Model3D(Vector3D position, Triangle[] triangles, Material material) {
@@ -82,20 +82,20 @@ public class Model3D extends Object3D {
         Vector3D position = getPosition();
         for (int i = 0; i < originalTriangles.size(); i++) {
             Triangle originalTriangle = originalTriangles.get(i).clone();
-            Vector3D[] transformedVertices = new Vector3D[]{Vector3D.ZERO(),Vector3D.ZERO(),Vector3D.ZERO()};
+            Vector3D[] transformedVertices = new Vector3D[]{Vector3D.ZERO(), Vector3D.ZERO(), Vector3D.ZERO()};
+            Vector3D[] transformedNormals = new Vector3D[]{Vector3D.ZERO(), Vector3D.ZERO(), Vector3D.ZERO()};
+
             for (int j = 0; j < 3; j++) {
-                transformedVertices[j] = Vector3D.add(transformedVertices[j], Vector3D.scalarMultiplication(originalTriangle.getVertices()[j], scale));
+                transformedVertices[j] = Vector3D.add(Vector3D.scalarMultiplication(originalTriangle.getVertices()[j], scale), position);
+                transformedNormals[j] = originalTriangle.getNormals()[j];
 
                 if (rotation != null && !rotation.equals(Quaternion.IDENTITY)) {
                     transformedVertices[j] = Vector3D.rotate(transformedVertices[j], rotation);
+                    transformedNormals[j] = Vector3D.rotate(transformedNormals[j], rotation);
                 }
-
-                transformedVertices[j].setX(transformedVertices[j].getX() + position.getX());
-                transformedVertices[j].setY(transformedVertices[j].getY() + position.getY());
-                transformedVertices[j].setZ(transformedVertices[j].getZ() + position.getZ());
             }
 
-            triangles.set(i, new Triangle(transformedVertices, originalTriangle.getNormals()));
+            triangles.set(i, new Triangle(transformedVertices, transformedNormals));
         }
     }
 }

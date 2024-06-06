@@ -11,7 +11,7 @@ public class Material {
     private double shininess;
     private double absorption;
 
-    public static Material MIRROR = new Material(0.95, 0.0, 100.0, 0.0);
+    public static Material MIRROR = new Material(1, 0.0, 100.0, 0.0);
     public static Material MATTE = new Material(0.0, 0.0, 15.0, 0.0);
     public static Material GLASS = new Material(0.8, 1.5, 0.0, 100);
     public static Material NONE = new Material(0.0, 0.0, 0.0, 0.0);

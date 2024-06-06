@@ -85,7 +85,30 @@ public class Quaternion {
         vector.setZ(rotatedQuat.z);
     }
 
-    private static Quaternion multiply(Quaternion a, Quaternion b) {
+    public static Quaternion normalize(Quaternion q) {
+        double magnitude = Math.sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+            return new Quaternion(
+                    q.w / magnitude,
+                    q.x / magnitude,
+                    q.y / magnitude,
+                    q.z / magnitude
+            );
+    }
+
+    public static Quaternion fromAxisAngle(Vector3D axis, double angleDegrees) {
+        double angleRadians = Math.toRadians(angleDegrees);
+        double halfAngle = angleRadians / 2;
+        double sinHalfAngle = Math.sin(halfAngle);
+
+        return new Quaternion(
+                Math.cos(halfAngle),
+                axis.getX() * sinHalfAngle,
+                axis.getY() * sinHalfAngle,
+                axis.getZ() * sinHalfAngle
+        );
+    }
+
+    public static Quaternion multiply(Quaternion a, Quaternion b) {
         return new Quaternion(
                 a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
                 a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,

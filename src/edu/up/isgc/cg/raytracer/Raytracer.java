@@ -2,6 +2,7 @@ package edu.up.isgc.cg.raytracer;
 
 import edu.up.isgc.cg.raytracer.lights.Light;
 import edu.up.isgc.cg.raytracer.lights.PointLight;
+import edu.up.isgc.cg.raytracer.lights.SpotLight;
 import edu.up.isgc.cg.raytracer.objects.*;
 import edu.up.isgc.cg.raytracer.tools.ColorTools;
 import edu.up.isgc.cg.raytracer.tools.Material;
@@ -21,40 +22,85 @@ import java.util.concurrent.TimeUnit;
 public class Raytracer {
     private static final double AMBIENT_INTENSITY = 1e-2;
     private static final double EPSILON = 1e-3;
-    private static final int MAX_RAY_DEPTH = 8;
+    private static final int MAX_RAY_DEPTH = 3;
 
     public static void main(String[] args) {
         long startTime = System.nanoTime();
         System.out.println(new Date());
 
-        Scene scene = new Scene();
-        scene.setCamera(new Camera(new Vector3D(0, 0, -5), 60, 60, 800, 800, 0.6, 60.0));
-        scene.addLight(new PointLight(new Vector3D(0.0, 5.0, -5.0), Material.NONE, 1));
+        Vector3D xAxis = new Vector3D(1, 0, 0);
+        Vector3D yAxis = new Vector3D(0, 0, 1);
+        Vector3D zAxis = new Vector3D(0, 1, 0);
+//        Quaternion rotationY = Quaternion.fromAxisAngle(yAxis, 30);
+//        Quaternion rotationX = Quaternion.fromAxisAngle(xAxis, 15);
+//        Quaternion combinedRotation = Quaternion.normalize(Quaternion.multiply(rotationY, rotationX));
+//        Quaternion rotationXUFO = Quaternion.fromAxisAngle(xAxis, 10);
+//        Quaternion rotationZUFO = Quaternion.fromAxisAngle(zAxis, 30);
+//        Quaternion ufoRotation = Quaternion.normalize(Quaternion.multiply(rotationXUFO, rotationZUFO));
+//        Scene scene01 = new Scene();
+//        scene01.setCamera(new Camera(new Vector3D(0, 0, -5), 90, 60, 3840, 2160, 0.6, 60.0));
+//        Vector3D sun_center = new Vector3D(-10.0, 10.0, -5.0);
+//        scene01.addLight(new PointLight(sun_center, Material.NONE, 1));
+//        Model3D saturn = OBJReader.getModel3D("Saturn.obj", new Vector3D(-3.5, 0, 3), Material.MATTE.colored(Color.PINK));
+//        scene01.addLight(new SpotLight(sun_center, Vector3D.normalize(Vector3D.substract(sun_center, saturn.getPosition())), Material.NONE.colored(Color.YELLOW), 1, 60));
+//        scene01.addObject(new Model3D(new Vector3D(0, -1, 0),
+//                new Triangle[]{
+//                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, -50, 50), new Vector3D(100, 50,
+//                                50)),
+//                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, 50, 50), new Vector3D(-100, 50, 50))
+//                },
+//                Material.MATTE.colored(Color.BLACK)));
+//        Model3D ufo = OBJReader.getModel3D("UFO.obj", new Vector3D(3.5, 4, 4), Material.MATTE.colored(Color.GRAY));
+//        Model3D steve = OBJReader.getModel3D("Steve.obj", new Vector3D(-1.5, -0.5, 1), Material.GLASS.colored(Color.GREEN));
+//        ufo.setScale(0.5);
+//        ufo.setRotation(ufoRotation);
+//        steve.setScale(0.15);
+//        steve.setRotation(combinedRotation);
+//        scene01.addObject(saturn);
+//        scene01.addObject(ufo);
+//        scene01.addObject(steve);
 
-        scene.addObject(new Model3D(new Vector3D(0, -1, 0),
+        Scene scene02 = new Scene();
+        scene02.setCamera(new Camera(new Vector3D(0, 0, -5), 60, 60, 300, 300, 0.6, 60.0));
+        scene02.addLight(new PointLight(new Vector3D(-10.0, 10.0, -5.0), Material.NONE, .6));
+        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
+                new Triangle[]{
+                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, -50, 50), new Vector3D(100, 50,
+                                50)),
+                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, 50, 50), new Vector3D(-100, 50, 50))
+                },
+                Material.MATTE.colored(new Color(0,0,50))));
+        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
                 new Triangle[]{
                         new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, -100), new Vector3D(100, 0, 100)),
                         new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, 100), new Vector3D(-100, 0, 100))
                 },
                 Material.MIRROR.colored(Color.DARK_GRAY)));
 
-        scene.addObject(new Model3D(new Vector3D(0, -1, 0),
-                new Triangle[]{
-                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, -50, 50), new Vector3D(100, 50,
-                                50)),
-                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, 50, 50), new Vector3D(-100, 50, 50))
-                },
-                Material.MATTE.colored(Color.DARK_GRAY)));
+        Model3D street_lamp = OBJReader.getModel3D("Scene02/StreetLamp.obj", new Vector3D(-3.5, 0, 3), Material.MATTE.colored(Color.LIGHT_GRAY));
+        Quaternion lampRotation = Quaternion.fromAxisAngle(zAxis, 30);
+        street_lamp.setRotation(lampRotation);
+        Model3D car = OBJReader.getModel3D("Scene02/Car.obj", new Vector3D(-3.0, 0, 2), Material.METAL.colored(Color.BLACK));
+        Quaternion carRotation = Quaternion.fromAxisAngle(zAxis, 30);
+        car.setRotation(carRotation);
+        Model3D cone = OBJReader.getModel3D("Scene02/Cone.obj", new Vector3D(-2, -2, -1.5), Material.MATTE.colored(Color.ORANGE));
+        Model3D hidrant = OBJReader.getModel3D("Scene02/FireHidrant.obj", new Vector3D(6.5, -1.5, 3), Material.MATTE.colored(Color.RED));
 
-        scene.addObject(new Sphere(new Vector3D(1, 0, 1), 1, Material.GLASS));
 
-        Material sphere_material = new Material(0.0, 1.5, 50, 0.1);
+        Model3D rain01 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
+        Model3D rain02 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
+        rain02.setRotation(carRotation);
+        Model3D pole = OBJReader.getModel3D("Scene02/Pole.obj", new Vector3D(-1.5, 0, 3), Material.MATTE.colored(Color.YELLOW));
 
-        // Background object
-        scene.addObject(new Sphere(new Vector3D(.5, 1, 3), 1.0, sphere_material.colored(Color.GREEN)));
-        scene.addObject(new Sphere(new Vector3D(2.2, 0, 5), 0.5, sphere_material.colored(Color.RED)));
+        scene02.addObject(rain01);
+        scene02.addObject(rain02);
+        scene02.addObject(street_lamp);
+        scene02.addObject(car);
+        scene02.addObject(cone);
+        scene02.addObject(hidrant);
+//        scene02.addObject(pole);
 
-        BufferedImage image = parallelImageRaytracing(scene);
+        BufferedImage image = parallelImageRaytracing(scene02);
         File outputImage = new File("image.png");
         try {
             ImageIO.write(image, "png", outputImage);
@@ -261,15 +307,6 @@ public class Raytracer {
                 double r0 = Math.pow((n1 - n2) / (n1 + n2), 2);
                 double rTheta = r0 + (1 - r0) * Math.pow(1 - c1, 5);
                 refractedColor = ColorTools.addWeightedColor(reflectedColor, refractedColor, rTheta);
-
-                // Beer's Law
-//                Intersection exitIntersection = raycast(refractedRay, objects, intersection.getObject(), clippingPlanes);
-//                if (exitIntersection != null) {
-//                    double distance = Vector3D.magnitude(Vector3D.substract(intersection.getPosition(), exitIntersection.getPosition()));
-//                    Color complementaryColor = ColorTools.getComplementaryColor(intersection.getObject().getMaterial().getColor());
-//                    refractedColor = ColorTools.getBeersLawColor(complementaryColor, intersection.getObject().getMaterial(), distance);
-//                }
-
                 refractedColor = ColorTools.scaleColor(refractedColor, nDotL);
                 totalRefractedColor = ColorTools.addColor(totalRefractedColor, refractedColor);
                 totalWeight += nDotL;
