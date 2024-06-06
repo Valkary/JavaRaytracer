@@ -60,47 +60,77 @@ public class Raytracer {
 //        scene01.addObject(ufo);
 //        scene01.addObject(steve);
 
-        Scene scene02 = new Scene();
-        scene02.setCamera(new Camera(new Vector3D(0, 0, -5), 60, 60, 300, 300, 0.6, 60.0));
-        scene02.addLight(new PointLight(new Vector3D(-10.0, 10.0, -5.0), Material.NONE, .6));
-        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
+//        Scene scene02 = new Scene();
+//        scene02.setCamera(new Camera(new Vector3D(0, 0, -5), 90, 60, 1920, 1080, 0.6, 60.0));
+//        scene02.addLight(new PointLight(new Vector3D(-10.0, 10.0, -5.0), Material.NONE, .6));
+//        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
+//                new Triangle[]{
+//                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, -50, 50), new Vector3D(100, 50,
+//                                50)),
+//                        new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, 50, 50), new Vector3D(-100, 50, 50))
+//                },
+//                Material.MATTE.colored(new Color(0,0,50))));
+//        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
+//                new Triangle[]{
+//                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, -100), new Vector3D(100, 0, 100)),
+//                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, 100), new Vector3D(-100, 0, 100))
+//                },
+//                Material.MIRROR.colored(Color.DARK_GRAY)));
+//        Model3D street_lamp = OBJReader.getModel3D("Scene02/StreetLamp.obj", new Vector3D(-3.5, 0, 3), Material.MATTE.colored(Color.LIGHT_GRAY));
+//        Quaternion lampRotation = Quaternion.fromAxisAngle(zAxis, 30);
+//        street_lamp.setRotation(lampRotation);
+//        Model3D car = OBJReader.getModel3D("Scene02/Car.obj", new Vector3D(-3.0, 0, 2), Material.METAL.colored(Color.BLACK));
+//        Quaternion carRotation = Quaternion.fromAxisAngle(zAxis, 30);
+//        car.setRotation(carRotation);
+//        Model3D cone = OBJReader.getModel3D("Scene02/Cone.obj", new Vector3D(-2, -2, -1.5), Material.MATTE.colored(Color.ORANGE));
+//        Model3D hidrant = OBJReader.getModel3D("Scene02/FireHidrant.obj", new Vector3D(6.5, -1.5, 3), Material.MATTE.colored(Color.RED));
+//        Model3D rain01 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
+//        Model3D rain02 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
+//        rain02.setRotation(carRotation);
+//        scene02.addObject(rain01);
+//        scene02.addObject(rain02);
+//        scene02.addObject(street_lamp);
+//        scene02.addObject(car);
+//        scene02.addObject(cone);
+//        scene02.addObject(hidrant);
+
+        Scene scene03 = new Scene();
+        scene03.setCamera(new Camera(new Vector3D(0, 0, -5), 60, 60, 400, 400, 0.6, 60.0));
+        scene03.addObject(new Model3D(new Vector3D(0, -1, 0),
+                new Triangle[]{
+                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, -100), new Vector3D(100, 0, 100)),
+                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, 100), new Vector3D(-100, 0, 100))
+                },
+                Material.MIRROR.colored(Color.DARK_GRAY)));
+        scene03.addObject(new Model3D(new Vector3D(0, -1, 0),
                 new Triangle[]{
                         new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, -50, 50), new Vector3D(100, 50,
                                 50)),
                         new Triangle(new Vector3D(-100, -50, 50), new Vector3D(100, 50, 50), new Vector3D(-100, 50, 50))
                 },
                 Material.MATTE.colored(new Color(0,0,50))));
-        scene02.addObject(new Model3D(new Vector3D(0, -1, 0),
-                new Triangle[]{
-                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, -100), new Vector3D(100, 0, 100)),
-                        new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, 100), new Vector3D(-100, 0, 100))
-                },
-                Material.MIRROR.colored(Color.DARK_GRAY)));
 
-        Model3D street_lamp = OBJReader.getModel3D("Scene02/StreetLamp.obj", new Vector3D(-3.5, 0, 3), Material.MATTE.colored(Color.LIGHT_GRAY));
-        Quaternion lampRotation = Quaternion.fromAxisAngle(zAxis, 30);
-        street_lamp.setRotation(lampRotation);
-        Model3D car = OBJReader.getModel3D("Scene02/Car.obj", new Vector3D(-3.0, 0, 2), Material.METAL.colored(Color.BLACK));
-        Quaternion carRotation = Quaternion.fromAxisAngle(zAxis, 30);
-        car.setRotation(carRotation);
-        Model3D cone = OBJReader.getModel3D("Scene02/Cone.obj", new Vector3D(-2, -2, -1.5), Material.MATTE.colored(Color.ORANGE));
-        Model3D hidrant = OBJReader.getModel3D("Scene02/FireHidrant.obj", new Vector3D(6.5, -1.5, 3), Material.MATTE.colored(Color.RED));
+        Material cera = new Material(Color.WHITE, 0.3, 0.0, 50, 0.0);
+        Vector3D sceneOrigin = new Vector3D(0, -0.5, 2);
+        scene03.addLight(new PointLight(new Vector3D(-10, 7, 5.45), Material.NONE.colored(Color.RED), .2));
+        scene03.addLight(new PointLight(new Vector3D(15, 15, -10), Material.NONE, .7));
 
+        Model3D base5 = OBJReader.getModel3D("Scene03/5base.obj", sceneOrigin, cera);
+        Model3D base = OBJReader.getModel3D("Scene03/base.obj", sceneOrigin, cera);
+        Model3D calaca = OBJReader.getModel3D("Scene03/calaca.obj", sceneOrigin, Material.GLASS);
+        Model3D cartas = OBJReader.getModel3D("Scene03/cartas.obj", sceneOrigin, Material.METAL.colored(Color.WHITE));
+        Model3D fuego = OBJReader.getModel3D("Scene03/fuego.obj", sceneOrigin, Material.MATTE.colored(Color.RED));
+        Model3D rosa = OBJReader.getModel3D("Scene03/rosa.obj", sceneOrigin, Material.MATTE.colored(Color.PINK));
+        Model3D verde = OBJReader.getModel3D("Scene03/verde.obj", sceneOrigin, Material.MATTE.colored(Color.GREEN));
+        scene03.addObject(base5);
+        scene03.addObject(base);
+        scene03.addObject(calaca);
+        scene03.addObject(cartas);
+        scene03.addObject(fuego);
+        scene03.addObject(rosa);
+        scene03.addObject(verde);
 
-        Model3D rain01 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
-        Model3D rain02 = OBJReader.getModel3D("Scene02/Rain.obj", new Vector3D(0,0,0), Material.GLASS);
-        rain02.setRotation(carRotation);
-        Model3D pole = OBJReader.getModel3D("Scene02/Pole.obj", new Vector3D(-1.5, 0, 3), Material.MATTE.colored(Color.YELLOW));
-
-        scene02.addObject(rain01);
-        scene02.addObject(rain02);
-        scene02.addObject(street_lamp);
-        scene02.addObject(car);
-        scene02.addObject(cone);
-        scene02.addObject(hidrant);
-//        scene02.addObject(pole);
-
-        BufferedImage image = parallelImageRaytracing(scene02);
+        BufferedImage image = parallelImageRaytracing(scene03);
         File outputImage = new File("image.png");
         try {
             ImageIO.write(image, "png", outputImage);
@@ -150,7 +180,7 @@ public class Raytracer {
         executorService.shutdown();
 
         try {
-            if (!executorService.awaitTermination(15, TimeUnit.MINUTES)) {
+            if (!executorService.awaitTermination(1000, TimeUnit.MINUTES)) {
                 executorService.shutdownNow();
             }
         } catch (InterruptedException e) {
@@ -298,7 +328,7 @@ public class Raytracer {
                 lights,
                 refractedRay,
                 clippingPlanes,
-                depth
+                depth + 1
         );
 
         for (Light light : lights) {
