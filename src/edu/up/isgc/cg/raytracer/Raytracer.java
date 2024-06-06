@@ -95,7 +95,7 @@ public class Raytracer {
 //        scene02.addObject(hidrant);
 
         Scene scene03 = new Scene();
-        scene03.setCamera(new Camera(new Vector3D(0, 0, -5), 60, 60, 400, 400, 0.6, 60.0));
+        scene03.setCamera(new Camera(new Vector3D(0, 0, -5), 90, 60, 3840, 2160, 0.6, 60.0));
         scene03.addObject(new Model3D(new Vector3D(0, -1, 0),
                 new Triangle[]{
                         new Triangle(new Vector3D(-100, 0, -100), new Vector3D(100, 0, -100), new Vector3D(100, 0, 100)),
